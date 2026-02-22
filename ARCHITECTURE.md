@@ -32,7 +32,7 @@ Plataforma centralizada de gestión de productividad con 6 módulos principales:
 | **Auth** | JWT (access + refresh tokens) |
 | **Telegram** | Telegram Bot API (node-telegram-bot-api) |
 | **Scheduler** | node-cron |
-| **PDF/Reportes** | Puppeteer (generación PDF) |
+| **PDF/Reportes** | PDFKit (generación PDF) |
 | **Validación** | Zod (frontend + backend) |
 
 ---

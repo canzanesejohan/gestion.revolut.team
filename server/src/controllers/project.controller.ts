@@ -32,7 +32,7 @@ export async function getProjects(req: Request, res: Response) {
 
 export async function getProjectById(req: Request, res: Response) {
   const project = await prisma.project.findUnique({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     include: {
       manager: { select: { id: true, name: true, avatarUrl: true } },
       deliveries: {
@@ -67,7 +67,7 @@ export async function createProject(req: AuthRequest, res: Response) {
 
 export async function updateProject(req: AuthRequest, res: Response) {
   const project = await prisma.project.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: req.body,
     include: {
       manager: { select: { id: true, name: true } },
@@ -79,6 +79,6 @@ export async function updateProject(req: AuthRequest, res: Response) {
 }
 
 export async function deleteProject(req: Request, res: Response) {
-  await prisma.project.delete({ where: { id: req.params.id } });
+  await prisma.project.delete({ where: { id: req.params.id as string } });
   res.json({ message: "Proyecto eliminado" });
 }

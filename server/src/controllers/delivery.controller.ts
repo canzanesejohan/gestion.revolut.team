@@ -14,7 +14,7 @@ export async function getDeliveries(req: Request, res: Response) {
 }
 
 export async function getDeliveryById(req: Request, res: Response) {
-  const delivery = await deliveryService.getDeliveryById(req.params.id);
+  const delivery = await deliveryService.getDeliveryById(req.params.id as string);
   if (!delivery) {
     res.status(404).json({ error: "Entrega no encontrada" });
     return;
@@ -32,7 +32,7 @@ export async function createDelivery(req: AuthRequest, res: Response) {
 }
 
 export async function updateDelivery(req: AuthRequest, res: Response) {
-  const delivery = await deliveryService.updateDelivery(req.params.id, req.body);
+  const delivery = await deliveryService.updateDelivery(req.params.id as string, req.body);
 
   const io = req.app.get("io");
   io?.emit("delivery:updated", delivery);
@@ -45,7 +45,7 @@ export async function changeStatus(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
 
   const result = await deliveryService.changeDeliveryStatus(
-    req.params.id,
+    req.params.id as string,
     status,
     userId,
     note

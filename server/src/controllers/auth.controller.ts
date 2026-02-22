@@ -11,11 +11,11 @@ const JWT_REFRESH_EXPIRY = process.env.JWT_REFRESH_EXPIRY || "7d";
 
 function generateTokens(userId: string, role: string) {
   const accessToken = jwt.sign({ userId, role }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRY,
-  });
+    expiresIn: JWT_EXPIRY as string | number,
+  } as jwt.SignOptions);
   const refreshToken = jwt.sign({ userId, role }, JWT_REFRESH_SECRET, {
-    expiresIn: JWT_REFRESH_EXPIRY,
-  });
+    expiresIn: JWT_REFRESH_EXPIRY as string | number,
+  } as jwt.SignOptions);
   return { accessToken, refreshToken };
 }
 

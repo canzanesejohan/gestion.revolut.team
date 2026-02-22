@@ -10,6 +10,10 @@ import projectRoutes from "./routes/project.routes.js";
 import deliveryRoutes from "./routes/delivery.routes.js";
 import checkinRoutes from "./routes/checkin.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
+import calendarRoutes from "./routes/calendar.routes.js";
+import templateRoutes from "./routes/template.routes.js";
+import reportRoutes from "./routes/report.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,6 +32,10 @@ app.use("/api/projects", projectRoutes);
 app.use("/api/deliveries", deliveryRoutes);
 app.use("/api/checkins", checkinRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/calendar", calendarRoutes);
+app.use("/api/templates", templateRoutes);
+app.use("/api/reports", reportRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

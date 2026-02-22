@@ -100,7 +100,7 @@ export async function getBlockers(req: Request, res: Response) {
 
 export async function resolveBlocker(req: Request, res: Response) {
   const blocker = await prisma.checkinBlocker.update({
-    where: { id: req.params.id },
+    where: { id: req.params.id as string },
     data: { isResolved: true, resolvedAt: new Date() },
   });
   res.json(blocker);

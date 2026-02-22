@@ -8,7 +8,7 @@ export async function getNotifications(req: AuthRequest, res: Response) {
 }
 
 export async function markAsRead(req: AuthRequest, res: Response) {
-  const notification = await notifService.markAsRead(req.params.id);
+  const notification = await notifService.markAsRead(req.params.id as string);
   res.json(notification);
 }
 
