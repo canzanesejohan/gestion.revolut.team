@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MEMBER
+}
+
+enum ProjectStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+  ON_HOLD
+}
+
+enum DeliveryStatus {
+  PENDING
+  IN_PROGRESS
+  IN_REVIEW
+  COMPLETED
+  DELAYED
+  BLOCKED
+}
+
+enum DeliveryType {
+  FEATURE
+  BUG_FIX
+  DOCUMENTATION
+  DESIGN
+  RESEARCH
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum NotificationType {
+  STATUS_CHANGE
+  DEADLINE_WARNING
+  BLOCKER_ALERT
+  CHECKIN_REMINDER
+  REPORT_READY
+  WORKLOAD_ALERT
+  BOTTLENECK
+}
+
+enum NotificationChannel {
+  IN_APP
+  TELEGRAM
+}
+
+enum ReportFrequency {
+  WEEKLY
+  MONTHLY
+}
+
+enum TemplateCategory {
+  DEVELOPMENT
+  MARKETING
+  OPERATIONS
+  CUSTOM
+}
+
+enum MilestoneStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  DELAYED
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(cuid())
+  name           String
+  email          String    @unique
+  password       String
+  phone          String?
+  role           UserRole  @default(MEMBER)
+  telegramChatId String?
+  avatarUrl      String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // Relations
+  managedProjects  Project[]      @relation("ProjectManager")
+  assignedDeliveries Delivery[]   @relation("DeliveryAssignee")
+  changedLogs      DeliveryLog[]  @relation("LogChangedBy")
+  notifications    Notification[]
+  checkins         Checkin[]
+  createdTemplates ProjectTemplate[] @relation("TemplateCreator")
+  createdReports   ReportConfig[]    @relation("ReportCreator")
+
+  @@map("users")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus @default(ACTIVE)
+  startDate   DateTime
+  endDate     DateTime
+  managerId   String
+  templateId  String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  manager     User          @relation("ProjectManager", fields: [managerId], references: [id])
+  deliveries  Delivery[]
+  milestones  Milestone[]
+  checkins    Checkin[]
+
+  @@map("projects")
+}
+
+model Milestone {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  projectId   String
+  dueDate     DateTime
+  status      MilestoneStatus @default(PENDING)
+  order       Int
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deliveries  Delivery[]
+
+  @@map("milestones")
+}
+
+model Delivery {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  status      DeliveryStatus @default(PENDING)
+  type        DeliveryType   @default(FEATURE)
+  priority    Priority       @default(MEDIUM)
+  progress    Int            @default(0)
+  projectId   String
+  assigneeId  String
+  milestoneId String?
+  dueDate     DateTime
+  completedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  project       Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assignee      User           @relation("DeliveryAssignee", fields: [assigneeId], references: [id])
+  milestone     Milestone?     @relation(fields: [milestoneId], references: [id])
+  logs          DeliveryLog[]
+  notifications Notification[]
+
+  @@map("deliveries")
+}
+
+model DeliveryLog {
+  id             String         @id @default(cuid())
+  deliveryId     String
+  previousStatus DeliveryStatus
+  newStatus      DeliveryStatus
+  changedById    String
+  note           String?
+  createdAt      DateTime       @default(now())
+
+  // Relations
+  delivery  Delivery @relation(fields: [deliveryId], references: [id], onDelete: Cascade)
+  changedBy User     @relation("LogChangedBy", fields: [changedById], references: [id])
+
+  @@map("delivery_logs")
+}
+
+model Notification {
+  id         String              @id @default(cuid())
+  userId     String
+  type       NotificationType
+  title      String
+  message    String
+  channel    NotificationChannel @default(IN_APP)
+  read       Boolean             @default(false)
+  deliveryId String?
+  createdAt  DateTime            @default(now())
+
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  delivery Delivery? @relation(fields: [deliveryId], references: [id])
+
+  @@map("notifications")
+}
+
+model Checkin {
+  id           String   @id @default(cuid())
+  userId       String
+  projectId    String
+  date         DateTime @default(now()) @db.Date
+  accomplished String
+  planned      String
+  mood         Int      @default(3)
+  createdAt    DateTime @default(now())
+
+  // Relations
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  blockers CheckinBlocker[]
+
+  @@unique([userId, date])
+  @@map("checkins")
+}
+
+model CheckinBlocker {
+  id          String    @id @default(cuid())
+  checkinId   String
+  description String
+  isResolved  Boolean   @default(false)
+  resolvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  // Relations
+  checkin Checkin @relation(fields: [checkinId], references: [id], onDelete: Cascade)
+
+  @@map("checkin_blockers")
+}
+
+model ProjectTemplate {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  category    TemplateCategory @default(CUSTOM)
+  isPublic    Boolean          @default(false)
+  createdById String
+  usageCount  Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relations
+  createdBy  User                @relation("TemplateCreator", fields: [createdById], references: [id])
+  milestones TemplateMilestone[]
+
+  @@map("project_templates")
+}
+
+model TemplateMilestone {
+  id             String @id @default(cuid())
+  templateId     String
+  name           String
+  description    String?
+  relativeDueDay Int
+  deliveries     Json
+  order          Int
+
+  // Relations
+  template ProjectTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@map("template_milestones")
+}
+
+model ReportConfig {
+  id              String          @id @default(cuid())
+  name            String
+  frequency       ReportFrequency
+  recipients      Json
+  sections        Json
+  projectIds      Json
+  lastGeneratedAt DateTime?
+  createdById     String
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  // Relations
+  createdBy User @relation("ReportCreator", fields: [createdById], references: [id])
+
+  @@map("report_configs")
+}
