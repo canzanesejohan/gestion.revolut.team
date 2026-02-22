@@ -15,6 +15,7 @@ import calendarRoutes from "./routes/calendar.routes.js";
 import templateRoutes from "./routes/template.routes.js";
 import reportRoutes from "./routes/report.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -38,6 +39,7 @@ app.use("/api/calendar", calendarRoutes);
 app.use("/api/templates", templateRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {

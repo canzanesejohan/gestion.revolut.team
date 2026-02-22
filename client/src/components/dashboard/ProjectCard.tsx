@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ProgressBar } from "./ProgressBar";
 import { getInitials } from "../../lib/utils";
 import type { Project } from "../../types";
+import { FolderOpen, Milestone } from "lucide-react";
 
 interface ProjectCardProps {
   project: Project;
@@ -11,14 +12,16 @@ export function ProjectCard({ project }: ProjectCardProps) {
   return (
     <Link
       to={`/projects/${project.id}`}
-      className="block rounded-xl border border-gray-200 bg-white p-5 transition-shadow hover:shadow-md"
+      className="card-hover block p-5"
     >
       <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-semibold text-gray-900">{project.name}</h3>
-          <p className="mt-1 text-sm text-gray-500">{project.description}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-gray-900 truncate">{project.name}</h3>
+          {project.description && (
+            <p className="mt-1 text-sm text-gray-500 line-clamp-2">{project.description}</p>
+          )}
         </div>
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-xs font-medium text-primary-700">
+        <div className="ml-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary-400 to-accent-500 text-xs font-bold text-white shadow-sm">
           {getInitials(project.manager.name)}
         </div>
       </div>
@@ -26,14 +29,22 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <div className="mt-4">
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">Progreso</span>
-          <span className="font-medium text-gray-900">{project.progress}%</span>
+          <span className="font-bold text-gray-900">{project.progress}%</span>
         </div>
-        <ProgressBar value={project.progress} size="sm" />
+        <div className="mt-1.5">
+          <ProgressBar value={project.progress} size="sm" />
+        </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
-        <span>{project._count.deliveries} entregas</span>
-        <span>{project._count.milestones} hitos</span>
+      <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
+        <span className="flex items-center gap-1">
+          <FolderOpen className="h-3 w-3" />
+          {project._count.deliveries} entregas
+        </span>
+        <span className="flex items-center gap-1">
+          <Milestone className="h-3 w-3" />
+          {project._count.milestones} hitos
+        </span>
       </div>
     </Link>
   );
