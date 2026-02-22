@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import { useDeliveryStore } from "../stores/deliveryStore";
 import { StatusBadge } from "../components/dashboard/StatusBadge";
 import { ProgressBar } from "../components/dashboard/ProgressBar";
+import { KanbanBoard } from "../components/dashboard/KanbanBoard";
+import { CreateDeliveryModal } from "../components/dashboard/CreateDeliveryModal";
 import { formatDate, getInitials } from "../lib/utils";
 import { PRIORITY_CONFIG, type DeliveryStatus } from "../types";
+import { List, Columns3, Plus } from "lucide-react";
 
 const statusFilters: (DeliveryStatus | "ALL")[] = [
   "ALL",
@@ -15,14 +18,26 @@ const statusFilters: (DeliveryStatus | "ALL")[] = [
   "BLOCKED",
 ];
 
+type ViewMode = "table" | "kanban";
+
 export function Deliveries() {
   const { deliveries, loading, fetchDeliveries } = useDeliveryStore();
   const [filter, setFilter] = useState<DeliveryStatus | "ALL">("ALL");
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
-    const params = filter !== "ALL" ? { status: filter } : {};
+    const params = filter !== "ALL" ? { status: filter } : undefined;
     fetchDeliveries(params);
   }, [filter, fetchDeliveries]);
+
+  const handleCreated = () => {
+    fetchDeliveries(filter !== "ALL" ? { status: filter } : undefined);
+  };
+
+  const handleKanbanChange = () => {
+    fetchDeliveries(filter !== "ALL" ? { status: filter } : undefined);
+  };
 
   return (
     <div className="space-y-6">
@@ -31,9 +46,35 @@ export function Deliveries() {
           <h1 className="text-2xl font-bold text-gray-900">Entregas</h1>
           <p className="text-sm text-gray-500">Gestiona todas las entregas del equipo</p>
         </div>
-        <button className="rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">
-          + Nueva Entrega
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1">
+            <button
+              onClick={() => setViewMode("table")}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                viewMode === "table" ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <List className="h-3.5 w-3.5" />
+              Tabla
+            </button>
+            <button
+              onClick={() => setViewMode("kanban")}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                viewMode === "kanban" ? "bg-primary-600 text-white" : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Columns3 className="h-3.5 w-3.5" />
+              Kanban
+            </button>
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+          >
+            <Plus className="h-4 w-4" />
+            Nueva Entrega
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2">
@@ -54,6 +95,8 @@ export function Deliveries() {
 
       {loading ? (
         <p className="py-12 text-center text-gray-500">Cargando...</p>
+      ) : viewMode === "kanban" ? (
+        <KanbanBoard deliveries={deliveries} onStatusChange={handleKanbanChange} />
       ) : (
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
           <table className="w-full">
@@ -105,6 +148,12 @@ export function Deliveries() {
           )}
         </div>
       )}
+
+      <CreateDeliveryModal
+        open={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreated={handleCreated}
+      />
     </div>
   );
 }

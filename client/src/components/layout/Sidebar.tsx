@@ -8,6 +8,7 @@ import {
   FileText,
   FolderKanban,
   Settings,
+  Users,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -19,7 +20,8 @@ const navItems = [
   { to: "/analytics", icon: BarChart3, label: "Analytics" },
   { to: "/templates", icon: FolderKanban, label: "Plantillas" },
   { to: "/reports", icon: FileText, label: "Reportes" },
-  { to: "/settings", icon: Settings, label: "Configuración" },
+  { to: "/users", icon: Users, label: "Equipo" },
+  { to: "/settings", icon: Settings, label: "Configuracion" },
 ];
 
 export function Sidebar() {

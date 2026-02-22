@@ -10,6 +10,7 @@ import { Templates } from "./pages/Templates";
 import { Reports } from "./pages/Reports";
 import { SettingsPage } from "./pages/Settings";
 import { ProjectDetail } from "./pages/ProjectDetail";
+import { Users } from "./pages/Users";
 import { useAuth } from "./hooks/useAuth";
 
 function ProtectedRoutes() {
@@ -29,6 +30,7 @@ function ProtectedRoutes() {
         <Route path="analytics" element={<Analytics />} />
         <Route path="templates" element={<Templates />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="users" element={<Users />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
       </Route>
